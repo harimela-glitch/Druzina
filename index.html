@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="sl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Družina</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0f4c5c">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Družina">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light dark;--bg:#f4f7f6;--card:#fff;--ink:#14262b;--mute:#5d7076;--line:#dce5e3;--brand:#0f4c5c;--on:#fff;--warn:#fff1cf;--warnb:#e8b43a;--a:#2f6fde;--h:#d6458b;--d:#2e9e6b;--v:#6b7b80}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1a1d;--card:#16282c;--ink:#e8f0ef;--mute:#9db1b5;--line:#264047;--brand:#5cc0d6;--on:#06232b;--warn:#3a2f10;--warnb:#a77c18}}
+html{height:100%}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:84px}
+main{max-width:640px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+h1{font-size:26px;margin:0;font-weight:800}header small{color:var(--mute);display:block;font-size:13px}
+#st{cursor:pointer;text-decoration:underline}
+h2{font-size:16px;margin:16px 0 8px;font-weight:800}
+.bell{border:0;background:var(--brand);color:var(--on);border-radius:20px;padding:9px 14px;font:inherit;font-weight:700;cursor:pointer}
+.alert{background:var(--warn);border:1px solid var(--warnb);border-radius:14px;padding:12px 14px;margin:8px 0}.alert b{display:block}
+form,.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px;margin-bottom:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:110px}
+input,select,button{font:inherit}
+input,select{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
+.add{border:0;background:var(--brand);color:var(--on);padding:11px;border-radius:10px;font-weight:800;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:18px;padding:8px 12px;cursor:pointer;font-weight:600}
+.chip.on{background:var(--brand);color:var(--on);border-color:var(--brand)}
+.sub{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sub .chip{border-radius:12px;padding:14px 8px;text-align:center}
+.it{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.it.dn .tx b{text-decoration:line-through;color:var(--mute)}
+.dot{width:10px;align-self:stretch;border-radius:6px;flex:none}.tx{flex:1;min-width:0}.tx b{display:block;overflow-wrap:anywhere}.tx small{color:var(--mute)}
+.it img{width:48px;height:48px;object-fit:cover;border-radius:8px;cursor:pointer}
+.ic{border:1px solid var(--line);background:none;color:var(--ink);border-radius:10px;width:38px;height:38px;cursor:pointer;font-size:16px}
+.gr{font-size:24px;font-weight:800;color:var(--brand);min-width:34px;text-align:center}
+.empty{color:var(--mute);padding:12px;text-align:center}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;border:0;background:none;color:var(--mute);padding:8px 0 7px;font-size:11px;font-weight:700;cursor:pointer}
+nav button span{display:block;font-size:20px}nav button.on{color:var(--brand)}
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:20px;display:none;max-width:90%;text-align:center;z-index:12}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:9}
+#sh{background:var(--card);width:100%;max-width:640px;border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:10px}
+#ov img{max-width:94%;max-height:90%;border-radius:10px;align-self:center}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.g5 .chip{font-size:22px;padding:12px 0;text-align:center}
+.pb{position:relative;text-align:center;overflow:hidden;padding:12px 8px}.pb input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+#gate{position:fixed;inset:0;background:var(--bg);z-index:20;display:none;align-items:center;justify-content:center;padding:24px}
+#gate form{max-width:380px;width:100%}
+</style></head><body>
+<main><header><div><h1>Družina</h1><small id="dt"></small><small id="st" data-a="code"></small></div><button class="bell" data-a="bell">🔔 Opozorila</button></header><div id="f"></div><div id="l"></div></main>
+<nav id="nav"></nav><div id="toast"></div><div id="ov" data-a="close"><div id="sh" data-a="none" hidden></div></div>
+<div id="gate"><form id="gf"><h1>Družinska koda</h1><div>Vpišita <b>isto kodo</b> na obeh telefonih. Koda je geslo za vajine podatke, zato naj bo dolga in težko ugibljiva (npr. ime-leto-beseda, vsaj 8 znakov).</div><input id="gc" placeholder="npr. ajla-hana-adi-2026" autocomplete="off" required minlength="8"><button class="add">Naprej</button></form></div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,signInAnonymously} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,updateDoc,deleteDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig={apiKey:"AIzaSyAXj0dzUrqAzr9DMYodFqv322QEuSm4Hs8",authDomain:"haris-mela-druzina.firebaseapp.com",projectId:"haris-mela-druzina",storageBucket:"haris-mela-druzina.firebasestorage.app",messagingSenderId:"374102930709",appId:"1:374102930709:web:dc1b8e256c56b72aaa251c"};
+const app=initializeApp(firebaseConfig),auth=getAuth(app);
+let db;try{db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){db=initializeFirestore(app,{})}
+const KC={Ajla:'--a',Hana:'--h',Adi:'--d'},KIDS=['Ajla','Hana','Adi'];
+const TABS=[['danes','🏠','Danes'],['sola','🎒','Šola'],['zdravnik','🩺','Zdravnik'],['nakupi','🛒','Nakupi'],['opravila','✅','Opravila'],['ocene','⭐','Ocene']];
+const SUBJ=['Matematika','Slovenščina','Likovna umetnost','Glasba','Angleščina','Gospodinjstvo','Športna vzgoja','Naravoslovje in tehnika','Nemščina'];
+const STORES=['Mercator','Spar','Hofer','Lidl','Eurospin','DM','Müller'];
+const GROC=['Zrnati sir','Sir','Skyr','Piščančje meso','Jabolka','Jajca','Skuta','Grški jogurt','Tuna','Proteinski napitek','Proteinska ploščica','Ovseni kosmiči','Banane','Kruh'];
+const CHORES=['Posesaj','Pomij tla','Odnesi smeti','Zloži perilo','Operi perilo','Pomij posodo','Pospravi otroško sobo','Pomij kopalnico','Obriši prah','Zalij rože','Zamenjaj posteljnino','Skuhaj kosilo'];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const iso=d=>new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const addD=n=>{const d=new Date();d.setDate(d.getDate()+n);return iso(d)};
+const TODAY=addD(0);
+const diff=d=>Math.round((new Date(d+'T00:00')-new Date(TODAY+'T00:00'))/864e5);
+function lbl(d){if(!d)return'';const n=diff(d);return n===0?'Danes':n===1?'Jutri':n<0?'Zamujeno':n<=7?'čez '+n+' dni':(d.split('-')[2]*1)+'. '+(d.split('-')[1]*1)+'.'}
+let tab='danes',S=[],col=null,ph=null,store='Mercator',who='Vsi',cdate=TODAY,gKid='Ajla',gs=null,live=false,unsub=null;
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3400)}
+const err=()=>toast('Ni shranjeno. Preveri povezavo in poskusi znova.');
+const put=it=>{if(!col)return toast('Najprej vpiši družinsko kodo.');it.id='i'+Date.now()+Math.random().toString(36).slice(2,5);it.ts=Date.now();setDoc(doc(col,it.id),it).catch(err)};
+const upd=(id,p)=>col&&updateDoc(doc(col,id),p).catch(err);
+const del=id=>col&&deleteDoc(doc(col,id)).catch(err);
+function status(){$('#st').textContent=live?'Skupni podatki ✓ (tapni za zamenjavo kode)':col?'Povezujem …':'Vpiši družinsko kodo'}
+async function connect(){const code=localStorage.getItem('fam');if(!code){$('#gate').style.display='flex';return}
+$('#gate').style.display='none';status();
+try{await signInAnonymously(auth)}catch(e){toast('Prijava ni uspela. Preveri, ali je Anonymous vklopljen v Firebase.');return}
+if(unsub)unsub();col=collection(db,'families',code,'items');
+unsub=onSnapshot(col,s=>{S=s.docs.map(x=>({...x.data(),id:x.id}));live=true;status();list();daily()},()=>{live=false;status();toast('Napaka sinhronizacije.')});status()}
+$('#gf').addEventListener('submit',e=>{e.preventDefault();const c=$('#gc').value.trim().toLowerCase().replace(/[^a-z0-9-_]/g,'-');if(c.length<8)return toast('Koda naj ima vsaj 8 znakov.');localStorage.setItem('fam',c);S=[];connect()});
+function small(f,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=560,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.55))};im.onerror=()=>cb(null);im.src=r.result};r.readAsDataURL(f)}
+const sel=(n,a,v)=>`<select name="${n}">${a.map(x=>`<option${x===v?' selected':''}>${x}</option>`).join('')}</select>`;
+const phBtns=h=>`<div class="row"><label class="chip pb">📷 Slikaj<input type="file" accept="image/*" capture="environment" data-a="photo"></label><label class="chip pb">🖼 Iz galerije<input type="file" accept="image/*" data-a="photo"></label></div><small id="pi">${ph?'Slika je pripravljena ✓':h}</small>`;
+const photoIn=()=>phBtns('Slikaj ali izberi sliko (neobvezno)');
+const chips=(a,act,on)=>`<div class="chips">${a.map(x=>`<button type="button" class="chip${x===on?' on':''}" data-a="${act}" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>`;
+function form(){let h='';
+if(tab==='sola')h=`<form data-k="school"><div class="row">${sel('vrsta',['Test','Spis','Ustno spraševanje','Izlet','Roditeljski sestanek','Drugo'])}${sel('subj',SUBJ)}</div><div class="row">${sel('kid',KIDS)}<input type="date" name="date" value="${TODAY}"><input type="time" name="time"></div><button class="add">Dodaj</button></form>`;
+else if(tab==='zdravnik')h=`<form data-k="doctor"><div class="row">${sel('vrsta',['Sistematski pregled','Zobozdravnik','Pediater','Cepljenje','Okulist','Drugo'])}${sel('kid',KIDS)}</div><div class="row"><input type="date" name="date" value="${TODAY}"><input type="time" name="time"></div><input name="note" placeholder="Opomba (neobvezno)"><button class="add">Dodaj</button></form>`;
+else if(tab==='nakupi')h=`<div class="box"><b>Trgovina</b>${chips(STORES,'store',store)}<b>Hitri izbor (en klik doda)</b>${chips(GROC,'groc')}</div><form data-k="shop"><input name="text" placeholder="Kaj še kupiti?" required>${photoIn()}<button class="add">Dodaj v ${esc(store)}</button></form>`;
+else if(tab==='opravila')h=`<div class="box"><div class="row">${sel('who',['Vsi','Mož','Žena'],who).replace('<select','<select data-a="who"')}<input type="date" id="cd" value="${cdate}" data-a="cdate"></div>${photoIn()}<b>Hitri izbor (en klik doda)</b>${chips(CHORES,'chore')}</div><form data-k="chore"><input name="text" placeholder="Drugo opravilo" required><button class="add">Dodaj</button></form>`;
+else if(tab==='ocene')h=`<div class="box"><b>Otrok</b>${chips(KIDS,'gkid',gKid)}<b>Klikni predmet in vpiši oceno</b><div class="sub">${SUBJ.map(s=>`<button class="chip" data-a="subj" data-v="${s}">${s}</button>`).join('')}</div></div>`;
+$('#f').innerHTML=h}
+function it(i){const w=i.kid||i.who||'',m=[i.type==='shop'?'':w,lbl(i.date),i.time].filter(Boolean).join(', ');
+const ok=i.type!=='grade'?`<button class="ic" data-a="tg" data-id="${i.id}" aria-label="Opravljeno">✓</button>`:'';
+return`<div class="it ${i.done?'dn':''}"><span class="dot" style="background:var(${KC[i.kid]||'--v'})"></span><div class="tx"><b>${esc(i.text)}</b>${m?`<small>${esc(m)}</small>`:''}</div>${i.type==='grade'?`<div class="gr">${esc(i.grade)}</div>`:''}${i.img?`<img src="${i.img}" data-a="zoom" alt="Slika">`:''}${ok}<button class="ic" data-a="rm" data-id="${i.id}" aria-label="Izbriši">×</button></div>`}
+const srt=a=>a.slice().sort((x,y)=>(x.done?1:0)-(y.done?1:0)||(x.date||'9').localeCompare(y.date||'9')||(x.time||'').localeCompare(y.time||''));
+const ofT=t=>S.filter(i=>i.type===t);
+const empty=t=>`<div class="empty">${t}</div>`;
+const near=()=>S.filter(i=>!i.done&&(i.type==='school'||i.type==='doctor')&&i.date&&diff(i.date)>=0&&diff(i.date)<=7).sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'').localeCompare(b.time||''));
+const shopOpen=()=>ofT('shop').filter(i=>!i.done);
+const choresT=()=>ofT('chore').filter(i=>!i.done&&(!i.date||diff(i.date)<=0));
+function list(){let h='';
+if(tab==='danes'){const n=near(),td=n.filter(i=>diff(i.date)===0),sh=shopOpen(),ch=choresT();
+if(td.length)h+=`<div class="alert"><b>Pazi, danes:</b>${td.map(i=>esc(i.text)+' ('+esc(i.kid)+')'+(i.time?' ob '+i.time:'')).join('<br>')}</div>`;
+if(sh.length)h+=`<div class="alert"><b>Danes kupi (${sh.length}):</b>${esc(sh.slice(0,6).map(i=>i.text).join(', '))}${sh.length>6?' …':''}</div>`;
+h+=`<h2>Prihodnjih 7 dni</h2>${n.length?n.map(it).join(''):empty('Ni opravkov v naslednjih 7 dneh.')}<h2>Opravila danes</h2>${ch.length?ch.map(it).join(''):empty('Vse opravljeno.')}`}
+else if(tab==='nakupi'){const o=shopOpen(),g={};o.forEach(i=>(g[i.store||'Drugje']=g[i.store||'Drugje']||[]).push(i));
+h=Object.keys(g).map(k=>`<h2>V trgovini ${esc(k)}</h2>`+g[k].map(it).join('')).join('')||empty('Seznam je prazen.');
+const d=ofT('shop').filter(i=>i.done);if(d.length)h+=`<h2>Kupljeno</h2>`+d.map(it).join('')}
+else if(tab==='ocene'){const l=ofT('grade').filter(i=>i.kid===gKid).sort((a,b)=>b.ts-a.ts),av=l.length?(l.reduce((s,i)=>s+ +i.grade,0)/l.length).toFixed(2):'–';
+h=`<h2>${esc(gKid)}: povprečje ${av}</h2>`+(l.length?l.map(it).join(''):empty('Še ni ocen.'))}
+else{const t={sola:'school',zdravnik:'doctor',opravila:'chore'}[tab],l=srt(ofT(t));h=l.length?l.map(it).join(''):empty('Še ni vnosov.')}
+$('#l').innerHTML=h}
+function render(){$('#dt').textContent=new Date().toLocaleDateString('sl-SI',{weekday:'long',day:'numeric',month:'long'});status();
+$('#nav').innerHTML=TABS.map(t=>`<button class="${t[0]===tab?'on':''}" data-a="tab" data-v="${t[0]}"><span>${t[1]}</span>${t[2]}</button>`).join('');form();list()}
+function withPhoto(o,msg){if(ph)o.img=ph;put(o);ph=null;const p=$('#pi');if(p)p.textContent='Slikaj ali izberi sliko (neobvezno)';toast(msg||'Dodano.')}
+document.addEventListener('submit',e=>{const f=e.target;if(!f.dataset.k)return;e.preventDefault();const k=f.dataset.k,v=Object.fromEntries(new FormData(f));let o={type:k};
+if(k==='school')o={...o,text:v.vrsta+': '+v.subj,kid:v.kid,date:v.date,time:v.time||''};
+if(k==='doctor')o={...o,text:v.vrsta+(v.note?' – '+v.note:''),kid:v.kid,date:v.date,time:v.time||''};
+if(k==='shop')o={...o,text:v.text.trim(),store};
+if(k==='chore')o={...o,text:v.text.trim(),who,date:cdate};
+withPhoto(o);f.reset()});
+document.addEventListener('change',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
+if(a==='photo'&&b.files&&b.files[0]){const fl=b.files[0];$('#pi').textContent='Nalagam sliko …';small(fl,d=>{ph=d;$('#pi').textContent=d?'Slika je pripravljena ✓':'Slike ni bilo mogoče prebrati, poskusi drugo.'});setTimeout(()=>{b.value=''},500)}
+if(a==='who')who=b.value;if(a==='cdate')cdate=b.value||TODAY});
+function sheet(s){$('#sh').hidden=false;$('#ov').style.display='flex';$('#sh').innerHTML=s}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v,id=b.dataset.id;
+if(a==='tab'){tab=v;render();scrollTo(0,0)}
+else if(a==='store'){store=v;form()}
+else if(a==='groc'){withPhoto({type:'shop',text:v,store},v+' dodano.')}
+else if(a==='chore'){withPhoto({type:'chore',text:v,who,date:cdate},v+' dodano.')}
+else if(a==='gkid'){gKid=v;form();list()}
+else if(a==='subj'){gs=v;sheet(`<b>${esc(gKid)}: ${esc(v)}</b><div class="g5">${[1,2,3,4,5].map(n=>`<button class="chip" data-a="grade" data-v="${n}">${n}</button>`).join('')}</div>${phBtns('Slikaj test (neobvezno), nato izberi oceno')}`)}
+else if(a==='grade'){withPhoto({type:'grade',text:gs,kid:gKid,grade:v},'Ocena shranjena.');$('#ov').style.display='none'}
+else if(a==='tg'){const i=S.find(x=>x.id===id);if(i)upd(id,{done:!i.done})}
+else if(a==='rm'){del(id)}
+else if(a==='zoom'){sheet(`<img src="${b.src}" alt="">`);$('#sh').style.background='none'}
+else if(a==='close'&&e.target.id==='ov'){$('#ov').style.display='none';$('#sh').style.background=''}
+else if(a==='code'){if(confirm('Zamenjam družinsko kodo?')){localStorage.removeItem('fam');live=false;col=null;S=[];list();connect()}}
+else if(a==='bell')bell()});
+function summary(){const p=[],n=near(),sh=shopOpen();n.forEach(i=>p.push(`${lbl(i.date)}: ${i.text} (${i.kid})`));if(sh.length)p.push('Nakupi: '+sh.length+' izdelkov');return p.join('\n')||'Danes ni opravkov.'}
+async function notify(t,b){try{if('Notification' in window&&Notification.permission==='granted'){const r=await navigator.serviceWorker?.getRegistration();if(r){await r.showNotification(t,{body:b,icon:'icon-192.png',badge:'icon-192.png'})}else new Notification(t,{body:b});return true}}catch(e){}return false}
+async function bell(){try{if('Notification' in window){if(Notification.permission==='default')await Notification.requestPermission();if(Notification.permission==='granted'&&await notify('Pazi, danes:',summary())){toast('Obvestila so vklopljena.');return}}}catch(e){}toast('Obvestila na tej napravi niso na voljo. '+summary().split('\n')[0])}
+async function daily(){try{if(localStorage.getItem('dn')===TODAY||!S.length)return;if(await notify('Družina: opomnik za danes',summary()))localStorage.setItem('dn',TODAY)}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&iso(new Date())!==TODAY)location.reload()});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+render();connect();
+</script></body></html>
