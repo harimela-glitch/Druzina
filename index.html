@@ -72,17 +72,17 @@ const TODAY=addD(0);
 const diff=d=>Math.round((new Date(d+'T00:00')-new Date(TODAY+'T00:00'))/864e5);
 function lbl(d){if(!d)return'';const n=diff(d);return n===0?'Danes':n===1?'Jutri':n<0?'Zamujeno':n<=7?'čez '+n+' dni':(d.split('-')[2]*1)+'. '+(d.split('-')[1]*1)+'.'}
 let tab='danes',S=[],col=null,ph=null,store='Mercator',who='Vsi',cdate=TODAY,gKid='Ajla',gs=null,live=false,unsub=null;
-function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3400)}
-const err=()=>toast('Ni shranjeno. Preveri povezavo in poskusi znova.');
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',7000)}
+const err=e=>toast('Ni shranjeno. Vzrok: '+((e&&(e.code||e.message))||'neznan'));
 const put=it=>{if(!col)return toast('Najprej vpiši družinsko kodo.');it.id='i'+Date.now()+Math.random().toString(36).slice(2,5);it.ts=Date.now();setDoc(doc(col,it.id),it).catch(err)};
 const upd=(id,p)=>col&&updateDoc(doc(col,id),p).catch(err);
 const del=id=>col&&deleteDoc(doc(col,id)).catch(err);
 function status(){$('#st').textContent=live?'Skupni podatki ✓ (tapni za zamenjavo kode)':col?'Povezujem …':'Vpiši družinsko kodo'}
 async function connect(){const code=localStorage.getItem('fam');if(!code){$('#gate').style.display='flex';return}
 $('#gate').style.display='none';status();
-try{await signInAnonymously(auth)}catch(e){toast('Prijava ni uspela. Preveri, ali je Anonymous vklopljen v Firebase.');return}
+try{await signInAnonymously(auth)}catch(e){toast('Prijava ni uspela. Vzrok: '+(e.code||e.message));return}
 if(unsub)unsub();col=collection(db,'families',code,'items');
-unsub=onSnapshot(col,s=>{S=s.docs.map(x=>({...x.data(),id:x.id}));live=true;status();list();daily()},()=>{live=false;status();toast('Napaka sinhronizacije.')});status()}
+unsub=onSnapshot(col,s=>{S=s.docs.map(x=>({...x.data(),id:x.id}));live=true;status();list();daily()},e=>{live=false;status();toast('Napaka sinhronizacije. Vzrok: '+(e.code||e.message))});status()}
 $('#gf').addEventListener('submit',e=>{e.preventDefault();const c=$('#gc').value.trim().toLowerCase().replace(/[^a-z0-9-_]/g,'-');if(c.length<8)return toast('Koda naj ima vsaj 8 znakov.');localStorage.setItem('fam',c);S=[];connect()});
 function small(f,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=560,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.55))};im.onerror=()=>cb(null);im.src=r.result};r.readAsDataURL(f)}
 const sel=(n,a,v)=>`<select name="${n}">${a.map(x=>`<option${x===v?' selected':''}>${x}</option>`).join('')}</select>`;
