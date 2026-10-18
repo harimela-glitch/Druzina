@@ -61,7 +61,7 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app);
 let db;try{db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){db=initializeFirestore(app,{})}
 const KC={Ajla:'--a',Hana:'--h',Adi:'--d'},KIDS=['Ajla','Hana','Adi'];
 const TABS=[['danes','🏠','Danes'],['sola','🎒','Šola'],['zdravnik','🩺','Zdravnik'],['nakupi','🛒','Nakupi'],['opravila','✅','Opravila'],['ocene','⭐','Ocene']];
-const SUBJ=['Matematika','Slovenščina','Likovna umetnost','Glasba','Angleščina','Gospodinjstvo','Športna vzgoja','Naravoslovje in tehnika','Nemščina'];
+const SUBJ=['Matematika','Slovenščina','Likovna umetnost','Glasba','Angleščina','Gospodinjstvo','Športna vzgoja','Naravoslovje in tehnika','Nemščina','Družba','Zgodovina','Geografija','Fizika','Kemija'];
 const STORES=['Mercator','Spar','Hofer','Lidl','Eurospin','DM','Müller'];
 const GROC=['Zrnati sir','Sir','Skyr','Piščančje meso','Jabolka','Jajca','Skuta','Grški jogurt','Tuna','Proteinski napitek','Proteinska ploščica','Ovseni kosmiči','Banane','Kruh'];
 const CHORES=['Posesaj','Pomij tla','Odnesi smeti','Zloži perilo','Operi perilo','Pomij posodo','Pospravi otroško sobo','Pomij kopalnico','Obriši prah','Zalij rože','Zamenjaj posteljnino','Skuhaj kosilo'];
