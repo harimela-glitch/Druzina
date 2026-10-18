@@ -44,6 +44,7 @@ nav button span{display:block;font-size:20px}nav button.on{color:var(--brand)}
 #sh{background:var(--card);width:100%;max-width:640px;border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:10px}
 #ov img{max-width:94%;max-height:90%;border-radius:10px;align-self:center}
 .pbi{position:relative;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;flex:none}.pbi input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.gl{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.gb{border:1px solid var(--line);background:var(--bg);color:var(--brand);border-radius:10px;min-width:40px;height:40px;padding:0 8px;font-size:18px;font-weight:800;cursor:pointer}
 .g5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.g5 .chip{font-size:22px;padding:12px 0;text-align:center}
 .pb{position:relative;text-align:center;overflow:hidden;padding:12px 8px}.pb input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
 #gate{position:fixed;inset:0;background:var(--bg);z-index:20;display:none;align-items:center;justify-content:center;padding:24px}
@@ -129,8 +130,11 @@ h+=`<h2>Prihodnjih 7 dni</h2>${n.length?n.map(it).join(''):empty('Ni opravkov v 
 else if(tab==='nakupi'){const o=shopOpen(),g={};o.forEach(i=>(g[i.store||'Drugje']=g[i.store||'Drugje']||[]).push(i));
 h=Object.keys(g).map(k=>`<h2>V trgovini ${esc(k)}</h2>`+g[k].map(it).join('')).join('')||empty('Seznam je prazen.');
 const d=ofT('shop').filter(i=>i.done);if(d.length)h+=`<h2>Kupljeno</h2>`+d.map(it).join('')}
-else if(tab==='ocene'){const l=ofT('grade').filter(i=>i.kid===gKid).sort((a,b)=>b.ts-a.ts),av=l.length?(l.reduce((s,i)=>s+ +i.grade,0)/l.length).toFixed(2):'–';
-h=`<h2>${esc(gKid)}: povprečje ${av}</h2>`+(l.length?l.map(it).join(''):empty('Še ni ocen.'))}
+else if(tab==='ocene'){const l=ofT('grade').filter(i=>i.kid===gKid).sort((a,b)=>a.ts-b.ts),av=l.length?(l.reduce((s,i)=>s+ +i.grade,0)/l.length).toFixed(2):'–';
+const by={};l.forEach(i=>(by[i.text]=by[i.text]||[]).push(i));
+const keys=[...SUBJ.filter(x=>by[x]),...Object.keys(by).filter(x=>!SUBJ.includes(x))];
+h=`<h2>${esc(gKid)}: skupno povprečje ${av}</h2>`+(keys.length?keys.map(k=>{const g=by[k],a=(g.reduce((s,i)=>s+ +i.grade,0)/g.length).toFixed(2);
+return`<div class="it"><span class="dot" style="background:var(${KC[gKid]||'--v'})"></span><div class="tx"><b>${esc(k)}</b><div class="gl">${g.map(i=>`<button class="gb" data-a="gd" data-id="${i.id}">${esc(i.grade)}${i.img?' 📎':''}</button>`).join('')}</div></div><div class="gr">Ø ${a}</div></div>`}).join(''):empty('Še ni ocen. Tapni predmet zgoraj in vpiši oceno.'))}
 else{const t={sola:'school',zdravnik:'doctor',opravila:'chore'}[tab],l=srt(ofT(t));h=l.length?l.map(it).join(''):empty('Še ni vnosov.')}
 $('#l').innerHTML=h}
 function render(){$('#dt').textContent=new Date().toLocaleDateString('sl-SI',{weekday:'long',day:'numeric',month:'long'});status();
@@ -145,9 +149,9 @@ withPhoto(o);f.reset()});
 document.addEventListener('change',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
 if(a==='photo'&&b.files&&b.files[0]){const fl=b.files[0];$('#pi').textContent='Nalagam sliko …';small(fl,d=>{ph=d;$('#pi').textContent=d?'Slika je pripravljena ✓':'Slike ni bilo mogoče prebrati, poskusi drugo.'});setTimeout(()=>{b.value=''},500)}
 if(a==='sp'&&b.files&&b.files[0]){const fl=b.files[0];toast('Nalagam sliko …');small(fl,d=>{if(!d)return toast('Slike ni bilo mogoče prebrati, poskusi drugo.');put({type:'shop',text:'Nakup – slika',store,img:d},'Nakup s sliko dodan ✓')});setTimeout(()=>{b.value=''},500)}
-if(a==='ip'&&b.files&&b.files[0]){const pid=b.dataset.id,fl=b.files[0];toast('Nalagam sliko …');small(fl,d=>{if(!d)return toast('Slike ni bilo mogoče prebrati, poskusi drugo.');upd(pid,{img:d});toast('Slika dodana ✓')})}
+if(a==='ip'&&b.files&&b.files[0]){const pid=b.dataset.id,fl=b.files[0];toast('Nalagam sliko …');small(fl,d=>{if(!d)return toast('Slike ni bilo mogoče prebrati, poskusi drugo.');upd(pid,{img:d});$('#ov').style.display='none';toast('Slika dodana ✓')})}
 if(a==='who')who=b.value;if(a==='cdate')cdate=b.value||TODAY});
-function sheet(s){$('#sh').hidden=false;$('#ov').style.display='flex';$('#sh').innerHTML=s}
+function sheet(s){$('#sh').style.background='';$('#sh').hidden=false;$('#ov').style.display='flex';$('#sh').innerHTML=s}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v,id=b.dataset.id;
 if(a==='tab'){tab=v;render();scrollTo(0,0)}
 else if(a==='store'){store=v;form()}
@@ -163,6 +167,8 @@ else if(a==='close'&&e.target.id==='ov'){$('#ov').style.display='none';$('#sh').
 else if(a==='code'){if(confirm('Zamenjam družinsko kodo?')){localStorage.removeItem('fam');live=false;col=null;S=[];list();connect()}}
 else if(a==='me'){localStorage.setItem('me',v);$('#ov').style.display='none'}
 else if(a==='seen'){localStorage.setItem('seen',String(Date.now()));list()}
+else if(a==='gd'){const g=S.find(x=>x.id===id);if(g){const d=new Date(g.ts||0).toLocaleDateString('sl-SI');sheet(`<b>${esc(g.text)}: ocena ${esc(g.grade)}</b><small>${d}${g.by?' · dodal(a): '+esc(g.by):''}</small>${g.img?`<img src="${g.img}" alt="Test" style="max-width:100%;border-radius:10px">`:''}<div class="row"><label class="chip pb">📷 ${g.img?'Zamenjaj':'Dodaj'} sliko testa<input type="file" accept="image/*" data-a="ip" data-id="${g.id}"></label><button class="chip" data-a="gdel" data-id="${g.id}">Odstrani oceno</button></div>`)}}
+else if(a==='gdel'){del(id);$('#ov').style.display='none'}
 else if(a==='bell')bell()});
 function summary(){const p=[],n=near(),sh=shopOpen();n.forEach(i=>p.push(`${lbl(i.date)}: ${i.text} (${i.kid})`));if(sh.length)p.push('Nakupi: '+sh.length+' izdelkov');return p.join('\n')||'Danes ni opravkov.'}
 async function notify(t,b){try{if('Notification' in window&&Notification.permission==='granted'){const r=await navigator.serviceWorker?.getRegistration();if(r){await r.showNotification(t,{body:b,icon:'icon-192.png',badge:'icon-192.png'})}else new Notification(t,{body:b});return true}}catch(e){}return false}
