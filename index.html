@@ -74,15 +74,20 @@ function lbl(d){if(!d)return'';const n=diff(d);return n===0?'Danes':n===1?'Jutri
 let tab='danes',S=[],col=null,ph=null,store='Mercator',who='Vsi',cdate=TODAY,gKid='Ajla',gs=null,live=false,unsub=null;
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',7000)}
 const err=e=>toast('Ni shranjeno. Vzrok: '+((e&&(e.code||e.message))||'neznan'));
-const put=it=>{if(!col)return toast('Najprej vpiši družinsko kodo.');it.id='i'+Date.now()+Math.random().toString(36).slice(2,5);it.ts=Date.now();setDoc(doc(col,it.id),it).catch(err)};
+var fromCache=false;
+const put=(it,msg)=>{if(!col){toast('Ni povezave z bazo. Počakaj, da zgoraj piše "Skupni podatki ✓", ali zamenjaj kodo.');return}
+it.id='i'+Date.now()+Math.random().toString(36).slice(2,5);it.ts=Date.now();
+S=[...S,{...it}];list();
+let ok=false;const t=setTimeout(()=>{if(!ok)toast('Čakam na strežnik … Če ostane tako, sta težava internet ali pravila baze.')},4000);
+setDoc(doc(col,it.id),it).then(()=>{ok=true;clearTimeout(t);toast(msg||'Shranjeno ✓')}).catch(e=>{ok=true;clearTimeout(t);S=S.filter(x=>x.id!==it.id);list();err(e)})};
 const upd=(id,p)=>col&&updateDoc(doc(col,id),p).catch(err);
 const del=id=>col&&deleteDoc(doc(col,id)).catch(err);
-function status(){$('#st').textContent=live?'Skupni podatki ✓ (tapni za zamenjavo kode)':col?'Povezujem …':'Vpiši družinsko kodo'}
+function status(){$('#st').textContent=live?'Skupni podatki ✓ · '+S.length+' vnosov'+(fromCache?' · samo predpomnilnik':'')+' (tapni za zamenjavo kode)':col?'Povezujem …':'Vpiši družinsko kodo'}
 async function connect(){const code=localStorage.getItem('fam');if(!code){$('#gate').style.display='flex';return}
 $('#gate').style.display='none';status();
 try{await signInAnonymously(auth)}catch(e){toast('Prijava ni uspela. Vzrok: '+(e.code||e.message));return}
 if(unsub)unsub();col=collection(db,'families',code,'items');
-unsub=onSnapshot(col,s=>{S=s.docs.map(x=>({...x.data(),id:x.id}));live=true;status();list();daily()},e=>{live=false;status();toast('Napaka sinhronizacije. Vzrok: '+(e.code||e.message))});status()}
+unsub=onSnapshot(col,s=>{S=s.docs.map(x=>({...x.data(),id:x.id}));fromCache=s.metadata.fromCache;live=true;status();list();daily()},e=>{live=false;status();toast('Napaka sinhronizacije. Vzrok: '+(e.code||e.message))});status()}
 $('#gf').addEventListener('submit',e=>{e.preventDefault();const c=$('#gc').value.trim().toLowerCase().replace(/[^a-z0-9-_]/g,'-');if(c.length<8)return toast('Koda naj ima vsaj 8 znakov.');localStorage.setItem('fam',c);S=[];connect()});
 function small(f,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=560,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.55))};im.onerror=()=>cb(null);im.src=r.result};r.readAsDataURL(f)}
 const sel=(n,a,v)=>`<select name="${n}">${a.map(x=>`<option${x===v?' selected':''}>${x}</option>`).join('')}</select>`;
@@ -119,7 +124,7 @@ else{const t={sola:'school',zdravnik:'doctor',opravila:'chore'}[tab],l=srt(ofT(t
 $('#l').innerHTML=h}
 function render(){$('#dt').textContent=new Date().toLocaleDateString('sl-SI',{weekday:'long',day:'numeric',month:'long'});status();
 $('#nav').innerHTML=TABS.map(t=>`<button class="${t[0]===tab?'on':''}" data-a="tab" data-v="${t[0]}"><span>${t[1]}</span>${t[2]}</button>`).join('');form();list()}
-function withPhoto(o,msg){if(ph)o.img=ph;put(o);ph=null;const p=$('#pi');if(p)p.textContent='Slikaj ali izberi sliko (neobvezno)';toast(msg||'Dodano.')}
+function withPhoto(o,msg){if(ph)o.img=ph;put(o,msg);ph=null;const p=$('#pi');if(p)p.textContent='Slikaj ali izberi sliko (neobvezno)'}
 document.addEventListener('submit',e=>{const f=e.target;if(!f.dataset.k)return;e.preventDefault();const k=f.dataset.k,v=Object.fromEntries(new FormData(f));let o={type:k};
 if(k==='school')o={...o,text:v.vrsta+': '+v.subj,kid:v.kid,date:v.date,time:v.time||''};
 if(k==='doctor')o={...o,text:v.vrsta+(v.note?' – '+v.note:''),kid:v.kid,date:v.date,time:v.time||''};
