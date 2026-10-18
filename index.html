@@ -104,11 +104,11 @@ const chips=(a,act,on)=>`<div class="chips">${a.map(x=>`<button type="button" cl
 function form(){let h='';
 if(tab==='sola')h=`<form data-k="school"><div class="row">${sel('vrsta',['Test','Spis','Ustno spraševanje','Izlet','Roditeljski sestanek','Drugo'])}${sel('subj',SUBJ)}</div><div class="row">${sel('kid',KIDS)}<input type="date" name="date" value="${TODAY}"><input type="time" name="time"></div><button class="add">Dodaj</button></form>`;
 else if(tab==='zdravnik')h=`<form data-k="doctor"><div class="row">${sel('vrsta',['Sistematski pregled','Zobozdravnik','Pediater','Cepljenje','Okulist','Drugo'])}${sel('kid',KIDS)}</div><div class="row"><input type="date" name="date" value="${TODAY}"><input type="time" name="time"></div><input name="note" placeholder="Opomba (neobvezno)"><button class="add">Dodaj</button></form>`;
-else if(tab==='nakupi')h=`<div class="box"><b>Trgovina</b>${chips(STORES,'store',store)}<b>Hitri izbor (en klik doda)</b>${chips(GROC,'groc')}</div><form data-k="shop"><input name="text" placeholder="Kaj še kupiti?" required>${photoIn()}<button class="add">Dodaj v ${esc(store)}</button></form>`;
+else if(tab==='nakupi')h=`<div class="box"><b>Trgovina</b>${chips(STORES,'store',store)}<b>Samo slika (nakup se doda takoj)</b><div class="row"><label class="chip pb">📷 Slikaj nakup<input type="file" accept="image/*" capture="environment" data-a="sp"></label><label class="chip pb">🖼 Iz galerije<input type="file" accept="image/*" data-a="sp"></label></div><b>Hitri izbor (en klik doda)</b>${chips(GROC,'groc')}</div><form data-k="shop"><input name="text" placeholder="Kaj še kupiti?" required>${photoIn()}<button class="add">Dodaj v ${esc(store)}</button></form>`;
 else if(tab==='opravila')h=`<div class="box"><div class="row">${sel('who',['Vsi','Mož','Žena'],who).replace('<select','<select data-a="who"')}<input type="date" id="cd" value="${cdate}" data-a="cdate"></div>${photoIn()}<b>Hitri izbor (en klik doda)</b>${chips(CHORES,'chore')}</div><form data-k="chore"><input name="text" placeholder="Drugo opravilo" required><button class="add">Dodaj</button></form>`;
 else if(tab==='ocene')h=`<div class="box"><b>Otrok</b>${chips(KIDS,'gkid',gKid)}<b>Klikni predmet in vpiši oceno</b><div class="sub">${SUBJ.map(s=>`<button class="chip" data-a="subj" data-v="${s}">${s}</button>`).join('')}</div></div>`;
 $('#f').innerHTML=h}
-function it(i){const w=i.kid||i.who||'',m=[i.type==='shop'?'':w,lbl(i.date),i.time,i.by?'dodal(a): '+i.by:''].filter(Boolean).join(', ');
+function it(i){const w=i.kid||i.who||'',m=[i.type==='shop'?(i.store||''):w,lbl(i.date),i.time,i.by?'dodal(a): '+i.by:''].filter(Boolean).join(', ');
 const ok=i.type!=='grade'?`<button class="ic" data-a="tg" data-id="${i.id}" aria-label="Opravljeno">✓</button>`:'';
 return`<div class="it ${i.done?'dn':''}"><span class="dot" style="background:var(${KC[i.kid]||'--v'})"></span><div class="tx"><b>${esc(i.text)}</b>${m?`<small>${esc(m)}</small>`:''}</div>${i.type==='grade'?`<div class="gr">${esc(i.grade)}</div>`:''}${i.img?`<img src="${i.img}" data-a="zoom" alt="Slika">`:`<label class="ic pbi" title="Dodaj sliko">📷<input type="file" accept="image/*" data-a="ip" data-id="${i.id}"></label>`}${ok}<button class="ic" data-a="rm" data-id="${i.id}" aria-label="Izbriši">×</button></div>`}
 const srt=a=>a.slice().sort((x,y)=>(x.done?1:0)-(y.done?1:0)||(x.date||'9').localeCompare(y.date||'9')||(x.time||'').localeCompare(y.time||''));
@@ -123,6 +123,7 @@ if(td.length)h+=`<div class="alert"><b>Pazi, danes:</b>${td.map(i=>esc(i.text)+'
 if(sh.length)h+=`<div class="alert"><b>Danes kupi (${sh.length}):</b>${esc(sh.slice(0,6).map(i=>i.text).join(', '))}${sh.length>6?' …':''}</div>`;
 const me=localStorage.getItem('me')||'',seen=Number(localStorage.getItem('seen')||0),nw=S.filter(x=>x.by&&x.by!==me&&x.ts>seen).sort((a,b)=>b.ts-a.ts).slice(0,8),gr=ofT('grade').sort((a,b)=>b.ts-a.ts).slice(0,5);
 if(nw.length)h+=`<h2>Novo od drugega</h2>`+nw.map(it).join('')+`<button class="chip" data-a="seen">Označi kot videno</button>`;
+if(sh.length)h+=`<h2>Nakupi (${sh.length})</h2>`+sh.slice(0,10).map(it).join('');
 h+=`<h2>Zadnje ocene</h2>${gr.length?gr.map(it).join(''):empty('Še ni ocen.')}`;
 h+=`<h2>Prihodnjih 7 dni</h2>${n.length?n.map(it).join(''):empty('Ni opravkov v naslednjih 7 dneh.')}<h2>Opravila danes</h2>${ch.length?ch.map(it).join(''):empty('Vse opravljeno.')}`}
 else if(tab==='nakupi'){const o=shopOpen(),g={};o.forEach(i=>(g[i.store||'Drugje']=g[i.store||'Drugje']||[]).push(i));
@@ -143,6 +144,7 @@ if(k==='chore')o={...o,text:v.text.trim(),who,date:cdate};
 withPhoto(o);f.reset()});
 document.addEventListener('change',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
 if(a==='photo'&&b.files&&b.files[0]){const fl=b.files[0];$('#pi').textContent='Nalagam sliko …';small(fl,d=>{ph=d;$('#pi').textContent=d?'Slika je pripravljena ✓':'Slike ni bilo mogoče prebrati, poskusi drugo.'});setTimeout(()=>{b.value=''},500)}
+if(a==='sp'&&b.files&&b.files[0]){const fl=b.files[0];toast('Nalagam sliko …');small(fl,d=>{if(!d)return toast('Slike ni bilo mogoče prebrati, poskusi drugo.');put({type:'shop',text:'Nakup – slika',store,img:d},'Nakup s sliko dodan ✓')});setTimeout(()=>{b.value=''},500)}
 if(a==='ip'&&b.files&&b.files[0]){const pid=b.dataset.id,fl=b.files[0];toast('Nalagam sliko …');small(fl,d=>{if(!d)return toast('Slike ni bilo mogoče prebrati, poskusi drugo.');upd(pid,{img:d});toast('Slika dodana ✓')})}
 if(a==='who')who=b.value;if(a==='cdate')cdate=b.value||TODAY});
 function sheet(s){$('#sh').hidden=false;$('#ov').style.display='flex';$('#sh').innerHTML=s}
